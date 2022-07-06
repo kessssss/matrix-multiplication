@@ -1,14 +1,11 @@
-// this program calculates the product of two matrixes.
-// the following parameters can be changed according to preference: sizes of matrixes, type of the matrix,
-// and range of random numbers (x0, x) for randomly filled matrixes
-
 #include <random>
 #include <iostream>
 #include <vector>
 #include <iterator>
 #include <chrono>
+#define NUM_THREADS 4
 
-const double x0 = 0;
+const double x0 = 0; // section for the randomly picked numbers
 const double x = 1;
 
 using namespace std;
@@ -48,17 +45,18 @@ int main()
 
 
 vector <double> product(vector <double> A, vector <double> B, int n, int m, int l)
-    {
-        vector <double> vsc(n * l, 0);
-#pragma omp parallel for
-        for (int i = 0; i < n; i++){
-            for (int j = 0; j < l; j++){
-                for (int k = 0; k < m; k++){
-                    vsc[i * l + j] += A[i * m + k] * B[k * l + j];
-                }
+{
+    omp_set_num_threads(NUM_THREADS);
+    vector <double> vsc(n * l, 0);
+    #pragma omp parallel for
+    for (int i = 0; i < n; i++){
+        for (int j = 0; j < l; j++){
+            for (int k = 0; k < m; k++){
+                vsc[i * l + j] += A[i * m + k] * B[k * l + j];
             }
         }
-        return vsc;
+    }
+    return vsc;
     }
 
 
@@ -68,7 +66,7 @@ vector<double> product_other(const vector<double> &A, size_t str1, const vector<
     int clmn1 = A.size() / str1;
     int clmn2 = B.size() / str2;
     vector<double> vsc(str1 * clmn2, 0);
-#pragma omp parallel for
+    #pragma omp parallel for
     for(int i = 0; i < str1; i++){
         for(int j = 0; j < clmn2; j++){
             int i2 = i * clmn1;
